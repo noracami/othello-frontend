@@ -7,6 +7,9 @@ import RoomChat from '@/components/room/RoomChat.vue';
 import RoomFooter from '@/components/room/RoomFooter.vue';
 import RoomPlayerCard from '@/components/room/RoomPlayerCard.vue';
 
+import { useSocketIOStore } from '@/stores/socket_io';
+const { subscribeGameRoom } = useSocketIOStore();
+
 // preparation on enter room
 // 1. check if the room is existed
 // 2. try to subscribe the room
@@ -28,8 +31,18 @@ import RoomPlayerCard from '@/components/room/RoomPlayerCard.vue';
 // piece placed
 // piece flipped
 
+const func1 = (roomId: string, toSubscribe: boolean) => {
+  console.log('always run');
+  if (toSubscribe) {
+    console.log('subscribe to room:', roomId);
+    subscribeGameRoom(roomId);
+  } else {
+    console.log('nothing to do');
+  }
+};
+
 onMounted(() => {
-  console.log('onMounted:', useRoute().params);
+  func1(useRoute().params['id'] as string, useRoute().query['subscribe'] === 'true');
 });
 
 onBeforeRouteUpdate(async (to, from) => {
@@ -38,7 +51,9 @@ onBeforeRouteUpdate(async (to, from) => {
     // const answer = window.confirm('Do you really want to leave? you have unsaved changes!');
     // // 取消导航并停留在同一页面上
     // if (!answer) return false;
-    console.log('onBeforeRouteUpdate:', 'to:', to.params, 'from:', from.params);
+
+    // console.log('onBeforeRouteUpdate:', 'to:', to.params, 'from:', from.params);
+    func1(to.params.id as string, to.query.subscribe === 'true');
   }
 });
 </script>
