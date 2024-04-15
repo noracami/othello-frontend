@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 
 // mock function store
 import { useMockFunctionStore } from './mock_function';
+import type { Socket } from 'node_modules/socket.io-client/build/cjs';
 
 export const useSocketIOStore = defineStore('sio', () => {
   const sio = ref<any>(null);
@@ -40,17 +41,46 @@ export const useSocketIOStore = defineStore('sio', () => {
       return;
     }
 
-    sio.value.emit('chat_to_lobby', message);
+    (sio.value as Socket).emit('chat_to_lobby', message);
+  };
+
+  const chatToGameRoom = (room: string, message: string = 'no message') => {
+    if (!sio.value) {
+      console.error('socket.io not connected');
+      return;
+    }
+
+    const payload = {
+      room_id: room,
+      message: message
+    };
+
+    sio.value.emit('room:chat', payload, (val: any) => {
+      console.group('exec chat_to_game_room response');
+      console.log('response type:', typeof val);
+      console.log('response:', val);
+      console.groupEnd();
+    });
   };
 
   const createGameRoom = () => {
-    return useMockFunctionStore().createGameRoom();
+    // return useMockFunctionStore().createGameRoom();
 
-    // if (!sio.value) {
-    //   console.error('socket.io not connected');
-    //   return;
-    // }
-    // sio.value.emit('create_game_room');
+    if (!sio.value) {
+      console.error('socket.io not connected');
+      return;
+    }
+
+    sio.value.emit('chat_to_lobby', 'message from createGameRoom');
+
+    sio.value.emit('room:create', (val: any) => {
+      console.group('exec room:create response');
+      console.log('response type:', typeof val);
+      console.log('response:', val);
+      console.groupEnd();
+    });
+
+    console.log('exec room:create done');
   };
 
   const subscribeGameRoom = (room: string) => {
@@ -77,6 +107,7 @@ export const useSocketIOStore = defineStore('sio', () => {
     sio,
     handleConnect,
     chatToLobby,
+    chatToGameRoom,
     createGameRoom,
     subscribeGameRoom,
     unsubscribeGameRoom,

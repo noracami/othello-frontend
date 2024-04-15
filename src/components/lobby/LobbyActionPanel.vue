@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CreateRoomButton from '@/components/CreateRoomButton.vue';
+import ChatButton from '../ChatButton.vue';
 defineProps<{
   msg?: string;
 }>();
@@ -9,6 +10,7 @@ defineProps<{
   <div class="wrapper">
     <h2>Action Panel</h2>
     <CreateRoomButton />
+    <ChatButton />
   </div>
 </template>
 
