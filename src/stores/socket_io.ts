@@ -1,6 +1,7 @@
+import io from 'socket.io-client';
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
-import io from 'socket.io-client';
+import { useRoomListStore } from '@/stores/room_list';
 
 // mock function store
 import { useMockFunctionStore } from './mock_function';
@@ -29,6 +30,26 @@ export const useSocketIOStore = defineStore('sio', () => {
     });
     sio.value.on('message', (message: any) => {
       console.log('socket.io message:', message);
+    });
+
+    // listen if room is created
+    sio.value.on('room:created', (room: any) => {
+      console.group('room:created');
+      console.log('room:', room);
+      console.groupEnd();
+
+      const { room_name: roomName, room_id: roomId } = room;
+      try {
+        if (roomName === undefined) throw new Error('roomName is undefined');
+        if (roomId === undefined) throw new Error('roomId is undefined');
+      } catch (error) {
+        // do something
+        console.error(error);
+        return;
+      }
+
+      const roomListStore = useRoomListStore();
+      roomListStore.addAvailableRoom({ roomName, roomId });
     });
     // sio.value.on('*', (event: any) => {
     //   console.log('socket.io event:', event);

@@ -2,8 +2,13 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 
 export const useRoomListStore = defineStore('room_list', () => {
-  const available_rooms = ref<any>([]);
-  const subscribed_rooms = ref<any>([]);
+  type Room = { roomName: string; roomId: string };
+  const available_rooms = ref<Room[]>([]);
+  const subscribed_rooms = ref<Room[]>([]);
 
-  return { available_rooms, subscribed_rooms };
+  const addAvailableRoom = (room: Room) => {
+    available_rooms.value.push(room);
+  };
+
+  return { available_rooms, subscribed_rooms, addAvailableRoom };
 });
