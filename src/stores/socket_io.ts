@@ -49,11 +49,8 @@ export const useSocketIOStore = defineStore('sio', () => {
       }
 
       const roomListStore = useRoomListStore();
-      roomListStore.addAvailableRoom({ roomName, roomId });
+      roomListStore.addAvailableRoom(roomName, roomId);
     });
-    // sio.value.on('*', (event: any) => {
-    //   console.log('socket.io event:', event);
-    // });
   };
 
   const chatToLobby = (message: string = 'no message') => {

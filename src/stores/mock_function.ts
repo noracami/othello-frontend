@@ -1,4 +1,3 @@
-// import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 
 import { useRoomListStore } from '@/stores/room_list';
