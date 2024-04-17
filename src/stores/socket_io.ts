@@ -10,6 +10,8 @@ import type { Socket } from 'node_modules/socket.io-client/build/cjs';
 export const useSocketIOStore = defineStore('sio', () => {
   const sio = ref<any>(null);
   const SOCKET_IO_SERVER = import.meta.env.VITE_SOCKET_IO_SERVER as string;
+  const { roomCreatedHandler, roomCreatedAckHandler, roomSubscribedAckHandler } =
+    useRoomListStore();
 
   const handleConnect = () => {
     if (sio.value) {
@@ -32,25 +34,7 @@ export const useSocketIOStore = defineStore('sio', () => {
       console.log('socket.io message:', message);
     });
 
-    // listen if room is created
-    sio.value.on('room:created', (room: any) => {
-      console.group('room:created');
-      console.log('room:', room);
-      console.groupEnd();
-
-      const { room_name: roomName, room_id: roomId } = room;
-      try {
-        if (roomName === undefined) throw new Error('roomName is undefined');
-        if (roomId === undefined) throw new Error('roomId is undefined');
-      } catch (error) {
-        // do something
-        console.error(error);
-        return;
-      }
-
-      const roomListStore = useRoomListStore();
-      roomListStore.addAvailableRoom(roomName, roomId);
-    });
+    sio.value.on('room:created', roomCreatedHandler);
   };
 
   const chatToLobby = (message: string = 'no message') => {
@@ -89,25 +73,19 @@ export const useSocketIOStore = defineStore('sio', () => {
       return;
     }
 
-    sio.value.emit('chat_to_lobby', 'message from createGameRoom');
-
     sio.value.emit('room:create', (val: any) => {
-      console.group('exec room:create response');
-      console.log('response type:', typeof val);
-      console.log('response:', val);
-      console.groupEnd();
+      roomCreatedAckHandler(JSON.parse(val));
     });
-
-    console.log('exec room:create done');
   };
 
+  // TODO: implement subscribeGameRoom and unsubscribeGameRoom
   const subscribeGameRoom = (room: string) => {
     return useMockFunctionStore().subscribeGameRoom(room);
     // if (!sio.value) {
     //   console.error('socket.io not connected');
     //   return;
     // }
-    // sio.value.emit('join_game_room', room);
+    // sio.value.emit('room:subscribe', room, roomSubscribedAckHandler);
   };
 
   const unsubscribeGameRoom = (room: string) => {
